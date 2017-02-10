@@ -1,0 +1,6 @@
+*.json
+*.csv
+*.log
+.idea/**
+metastore_db/**
+spark-warehouse/**
