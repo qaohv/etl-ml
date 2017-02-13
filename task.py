@@ -3,8 +3,8 @@ import matplotlib.pyplot as plt
 import sys
 
 if __name__ == "__main__":
-    if len(sys.argv) != 2:
-        print("Source csv not specified!", file=sys.stderr)
+    if len(sys.argv) != 3:
+        print("Source csv or path to db not specified!", file=sys.stderr)
         exit(-1)
 
     spark = SparkSession\
@@ -12,21 +12,18 @@ if __name__ == "__main__":
         .appName("TrafficCount")\
         .getOrCreate()
 
+    broadcast = spark.sparkContext.broadcast(sys.argv[2].strip())
+
     def IpLookup(pair):
-        from geolite2 import geolite2
-        reader = geolite2.reader()
-        match = reader.get(pair.ip)
-        geolite2.close()
-        if match is not None:
-            keys = match.keys()
-            if "country" in keys:
-                return (match["country"]["names"]["en"], pair.sum)
-            elif "registered_country" in keys:
-                return (match["registered_country"]["names"]["en"], pair.sum)
-            else:
-                return ("NOT_FOUND", pair.sum)
-        else:
-            return ("NOT_FOUND", pair.sum)
+      import geoip2.database
+      reader = geoip2.database.Reader(broadcast.value)
+      try:
+          match = reader.country(pair.ip)
+          return (match.country.name, pair.sum)
+      except geoip2.errors.AddressNotFoundError:
+          return ("NOT_FOUND", pair.sum)
+      finally:
+          reader.close()
 
     file = spark.read.csv(sys.argv[1].strip())
     lines = file.rdd.flatMap(lambda line: [(line[10], int(line[18])),(line[11], int(line[18]))]).\

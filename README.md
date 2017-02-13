@@ -3,12 +3,13 @@
 * Spark version 2.1.0, python v 3.5.2
 * Spark installed by manual https://www.santoshsrinivas.com/installing-apache-spark-on-ubuntu-16-04/
 * Set PYSPARK_PYTHON=python3 and PYSPARK_DRIVER_PYTHON=python3
-* Geolite2 lib https://github.com/RR2DO2/maxminddb-geolite2
+* Geolite2 lib https://github.com/maxmind/GeoIP2-python
+* Download and gunzip GeoLite2 Country database
 * System info: Ubuntu 16.04 LTS, Phenom II X4 3.2 GHz, 4GB RAM
 
 ### Usage ###
 
-* Run: spark-submit task.py sflow.csv
+* Run: spark-submit task.py sflow.csv /full/path/to/database.mmdb
 
 ### Results ###
 
